@@ -1,3 +1,10 @@
+# import os
+# from pathlib import Path
+
+# # Ensure KERAS_HOME points within workspace to avoid permission issues
+# os.environ.setdefault("KERAS_HOME", str(Path(__file__).resolve().parent.parent / ".keras"))
+# Path(os.environ["KERAS_HOME"]).mkdir(parents=True, exist_ok=True)
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +15,23 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error # Import mea
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import EarlyStopping
+
+# def save_current_plot(folder_name, title):
+#     # Sanitize title for valid filename across OS
+#     clean_title = "".join(c if c not in '<>:"/\\|?*' else (' -' if c == ':' else '_') for c in title).strip()
+#     filename = f"{clean_title}.png"
+    
+#     # Save in plots/<folder_name>
+#     p1 = Path(__file__).resolve().parent / "plots" / folder_name / filename
+#     p1.parent.mkdir(parents=True, exist_ok=True)
+#     plt.savefig(p1, dpi=300, bbox_inches='tight')
+    
+#     # Also save in plot/<folder_name>
+#     p2 = Path(__file__).resolve().parent / "plot" / folder_name / filename
+#     p2.parent.mkdir(parents=True, exist_ok=True)
+#     plt.savefig(p2, dpi=300, bbox_inches='tight')
+    
+#     print(f"Saved plot: {p1}")
 
 #  Load dataset
 df = pd.read_excel(Path(__file__).with_name("dataCombined1.csv"))
@@ -59,38 +83,53 @@ print(f"Mean Absolute Error (MAE): {mae:.6f}")
 print(f"Relative MSE: {relative_mse:.6f}")
 
 
-# # Plot: Training vs Validation Loss (MSE)
-# plt.figure(figsize=(8, 4))
-# plt.plot(history.history['loss'], label='Training loss', color='yellow')
-# plt.plot(history.history['val_loss'], label='Validation loss', color='blue')
-# plt.xlabel('Epochs')
-# plt.ylabel('Loss')
-# plt.title('Training and validation loss')
-# plt.legend()
-# plt.grid(True)
-# plt.tight_layout()
-# plt.show()
+# Plot: Training vs Validation Loss (MSE)
+plt.figure(figsize=(8, 4))
+plt.plot(history.history['loss'], label='Training loss', color='yellow')
+plt.plot(history.history['val_loss'], label='Validation loss', color='blue')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+title_py1 = 'Training and validation loss'
+plt.title(title_py1)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+# save_current_plot("python", title_py1)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+    # plt.show()
+# plt.close()
 
-# # Plot: MAE
-# plt.figure(figsize=(8, 4))
-# plt.plot(history.history['mae'], label='Training Mean absolute error', color='green')
-# plt.plot(history.history['val_mae'], label='Validation Mean absolute error', color='red')
-# plt.xlabel('Epochs')
-# plt.ylabel('Mean Absolute Error')
-# plt.title('Training and validation Mean absolute error')
-# plt.legend()
-# plt.grid(True)
-# plt.tight_layout()
-# plt.show()
+# Plot: MAE
+plt.figure(figsize=(8, 4))
+plt.plot(history.history['mae'], label='Training Mean absolute error', color='green')
+plt.plot(history.history['val_mae'], label='Validation Mean absolute error', color='red')
+plt.xlabel('Epochs')
+plt.ylabel('Mean Absolute Error')
+title_py2 = 'Training and validation Mean absolute error'
+plt.title(title_py2)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+# save_current_plot("python", title_py2)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+    # plt.show()
+# plt.close()
 
-# # # --- Plot  MSE vs Relative MSE ---
-# plt.figure(figsize=(6, 4))
-# plt.bar(['MSE', 'Relative MSE'], [mse, relative_mse], color=['skyblue', 'lightgreen'])
-# plt.title('MSE vs Relative MSE')
-# plt.ylabel('Error')
-# plt.grid(True, axis='y')
-# plt.tight_layout()
-# plt.show()
+# # --- Plot  MSE vs Relative MSE ---
+plt.figure(figsize=(6, 4))
+plt.bar(['MSE', 'Relative MSE'], [mse, relative_mse], color=['skyblue', 'lightgreen'])
+title_py3 = 'MSE vs Relative MSE'
+plt.title(title_py3)
+plt.ylabel('Error')
+plt.grid(True, axis='y')
+plt.tight_layout()
+plt.show()
+# save_current_plot("python", title_py3)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+    # plt.show()
+# plt.close()
 
 import tensorflow as tf
 
@@ -197,11 +236,17 @@ plt.axhline(y=np.mean((y_test_scaled[:num_samples] - scaler_y.transform(y_pred_e
             color='cyan', linestyle='--', label='ESP32 Hardware Test Loss (Scaled)')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
-plt.title('Model 2: Training and validation loss (with ESP32 Hardware Test Benchmark)')
+title_esp1 = 'Training and validation loss (with ESP32 Hardware Test Benchmark)'
+plt.title(title_esp1)
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+# save_current_plot("esp32", title_esp1)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+    # plt.show()
+# plt.close()
+
 
 # --- Graph 2: Mean Absolute Error (MAE) Plot ---
 plt.figure(figsize=(8, 4))
@@ -211,51 +256,61 @@ plt.axhline(y=np.mean(np.abs(y_test_scaled[:num_samples] - scaler_y.transform(y_
             color='orange', linestyle='--', label='ESP32 Hardware Test MAE (Scaled)')
 plt.xlabel('Epochs')
 plt.ylabel('Mean Absolute Error')
-plt.title('Model 2: Training and validation Mean absolute error (with ESP32 Benchmark)')
+title_esp2 = 'Training and validation Mean absolute error (with ESP32 Benchmark)'
+plt.title(title_esp2)
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+# save_current_plot("esp32", title_esp2)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+#     plt.show()
+# plt.close()
 
 # --- Graph 3: ESP32 Hardware MSE vs Relative MSE Bar Chart ---
 plt.figure(figsize=(6, 4))
 plt.bar(['MSE', 'Relative MSE'], [esp_mse, esp_relative_mse], color=['skyblue', 'lightgreen'])
-plt.title('Model 2 ESP32 Hardware: MSE vs Relative MSE')
+title_esp3 = 'Model 2 ESP32 Hardware: MSE vs Relative MSE'
+plt.title(title_esp3)
 plt.ylabel('Error')
 plt.grid(True, axis='y')
 plt.tight_layout()
 plt.show()
+# save_current_plot("esp32", title_esp3)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+#     plt.show()
+# plt.close()
 
-y_pred_esp32 = np.array(y_pred_esp32)
-y_pred_python_subset = y_pred[:num_samples]
+# y_pred_esp32 = np.array(y_pred_esp32)
+# y_pred_python_subset = y_pred[:num_samples]
 
-# --- 1. Compute Unscaled Metrics for Model 2 (Python vs Arduino ESP32 on the same test subset) ---
-py_mse = mean_squared_error(y_actual_subset, y_pred_python_subset)
-py_mae = mean_absolute_error(y_actual_subset, y_pred_python_subset)
-py_var = np.var(y_actual_subset)
-py_relative_mse = py_mse / py_var
+# # --- 1. Compute Unscaled Metrics for Model 2 (Python vs Arduino ESP32 on the same test subset) ---
+# py_mse = mean_squared_error(y_actual_subset, y_pred_python_subset)
+# py_mae = mean_absolute_error(y_actual_subset, y_pred_python_subset)
+# py_var = np.var(y_actual_subset)
+# py_relative_mse = py_mse / py_var
 
-esp_mse = mean_squared_error(y_actual_subset, y_pred_esp32)
-esp_mae = mean_absolute_error(y_actual_subset, y_pred_esp32)
-esp_var = np.var(y_actual_subset)
-esp_relative_mse = esp_mse / esp_var
+# esp_mse = mean_squared_error(y_actual_subset, y_pred_esp32)
+# esp_mae = mean_absolute_error(y_actual_subset, y_pred_esp32)
+# esp_var = np.var(y_actual_subset)
+# esp_relative_mse = esp_mse / esp_var
 
-# --- 2. Compute Scaled Metrics for Model 2 (to match Keras Training/Validation scale on Plots 1 & 2) ---
-y_pred_esp32_scaled = scaler_y.transform(y_pred_esp32)
+# # --- 2. Compute Scaled Metrics for Model 2 (to match Keras Training/Validation scale on Plots 1 & 2) ---
+# y_pred_esp32_scaled = scaler_y.transform(y_pred_esp32)
 
-py_test_loss_scaled = np.mean((y_test_scaled[:num_samples] - y_pred_scaled[:num_samples]) ** 2)
-esp_test_loss_scaled = np.mean((y_test_scaled[:num_samples] - y_pred_esp32_scaled) ** 2)
+# py_test_loss_scaled = np.mean((y_test_scaled[:num_samples] - y_pred_scaled[:num_samples]) ** 2)
+# esp_test_loss_scaled = np.mean((y_test_scaled[:num_samples] - y_pred_esp32_scaled) ** 2)
 
-py_test_mae_scaled = np.mean(np.abs(y_test_scaled[:num_samples] - y_pred_scaled[:num_samples]))
-esp_test_mae_scaled = np.mean(np.abs(y_test_scaled[:num_samples] - y_pred_esp32_scaled))
+# py_test_mae_scaled = np.mean(np.abs(y_test_scaled[:num_samples] - y_pred_scaled[:num_samples]))
+# esp_test_mae_scaled = np.mean(np.abs(y_test_scaled[:num_samples] - y_pred_esp32_scaled))
 
-print("\n============ MODEL 2: MERGED PYTHON vs ARDUINO (ESP32) METRICS ===========")
-print(f"Metric         | Python (PC)   | Arduino (ESP32) | Absolute Diff")
-print("--------------------------------------------------------------------------")
-print(f"MSE            | {py_mse:13.6f} | {esp_mse:15.6f} | {abs(py_mse - esp_mse):.8f}")
-print(f"MAE            | {py_mae:13.6f} | {esp_mae:15.6f} | {abs(py_mae - esp_mae):.8f}")
-print(f"Relative MSE   | {py_relative_mse:13.6f} | {esp_relative_mse:15.6f} | {abs(py_relative_mse - esp_relative_mse):.8f}")
-print("==========================================================================\n")
+# print("\n============ MODEL 2: MERGED PYTHON vs ARDUINO (ESP32) METRICS ===========")
+# print(f"Metric         | Python (PC)   | Arduino (ESP32) | Absolute Diff")
+# print("--------------------------------------------------------------------------")
+# print(f"MSE            | {py_mse:13.6f} | {esp_mse:15.6f} | {abs(py_mse - esp_mse):.8f}")
+# print(f"MAE            | {py_mae:13.6f} | {esp_mae:15.6f} | {abs(py_mae - esp_mae):.8f}")
+# print(f"Relative MSE   | {py_relative_mse:13.6f} | {esp_relative_mse:15.6f} | {abs(py_relative_mse - esp_relative_mse):.8f}")
+# print("==========================================================================\n")
 
 # # --- Graph 1: Model 2 Merged Loss (MSE) Plot (Python + ESP32) ---
 # plt.figure(figsize=(8, 4))

@@ -1,13 +1,36 @@
+# import os
+from pathlib import Path
+
+# Ensure KERAS_HOME points within workspace to avoid permission issues
+# os.environ.setdefault("KERAS_HOME", str(Path(__file__).resolve().parent.parent / ".keras"))
+# Path(os.environ["KERAS_HOME"]).mkdir(parents=True, exist_ok=True)
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score # Import mean_absolute_error and r2_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import EarlyStopping
+
+# def save_current_plot(folder_name, title):
+#     # Sanitize title for valid filename across OS
+#     clean_title = "".join(c if c not in '<>:"/\\|?*' else (' -' if c == ':' else '_') for c in title).strip()
+#     filename = f"{clean_title}.png"
+    
+#     # Save in plots/<folder_name>
+#     p1 = Path(__file__).resolve().parent / "plots" / folder_name / filename
+#     p1.parent.mkdir(parents=True, exist_ok=True)
+#     plt.savefig(p1, dpi=300, bbox_inches='tight')
+    
+#     # Also save in plot/<folder_name>
+#     p2 = Path(__file__).resolve().parent / "plot" / folder_name / filename
+#     p2.parent.mkdir(parents=True, exist_ok=True)
+#     plt.savefig(p2, dpi=300, bbox_inches='tight')
+    
+#     print(f"Saved plot: {p1}")
 
 #  Load dataset
 df = pd.read_excel(Path(__file__).with_name("dataCombined1.csv"))
@@ -67,29 +90,39 @@ print(f"Mean Absolute Error (MAE): {mae:.6f}")
 print(f"Relative MSE: {relative_mse:.6f}")
 
 
-# # Plot: Training vs Validation Loss (MSE)
-# plt.figure(figsize=(8, 4))
-# plt.plot(history.history['loss'], label='Training loss', color='yellow')
-# plt.plot(history.history['val_loss'], label='Validation loss', color='blue')
-# plt.xlabel('Epochs')
-# plt.ylabel('Loss')
-# plt.title('Training and validation loss')
-# plt.legend()
-# plt.grid(True)
-# plt.tight_layout()
-# plt.show()
+# Plot: Training vs Validation Loss (MSE)
+plt.figure(figsize=(8, 4))
+plt.plot(history.history['loss'], label='Training loss', color='yellow')
+plt.plot(history.history['val_loss'], label='Validation loss', color='blue')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+title_py1 = 'Training and validation loss'
+plt.title(title_py1)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+# save_current_plot("python", title_py1)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+#     plt.show()
+# plt.close()
 
-# # Plot: MAE
-# plt.figure(figsize=(8, 4))
-# plt.plot(history.history['mae'], label='Training Mean absolute error', color='green')
-# plt.plot(history.history['val_mae'], label='Validation Mean absolute error', color='red')
-# plt.xlabel('Epochs')
-# plt.ylabel('Mean Absolute Error')
-# plt.title('Training and validation Mean absolute error')
-# plt.legend()
-# plt.grid(True)
-# plt.tight_layout()
-# plt.show()
+# Plot: MAE
+plt.figure(figsize=(8, 4))
+plt.plot(history.history['mae'], label='Training Mean absolute error', color='green')
+plt.plot(history.history['val_mae'], label='Validation Mean absolute error', color='red')
+plt.xlabel('Epochs')
+plt.ylabel('Mean Absolute Error')
+title_py2 = 'Training and validation Mean absolute error'
+plt.title(title_py2)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+# save_current_plot("python", title_py2)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+#     plt.show()
+# plt.close()
 
 import tensorflow as tf
 
@@ -147,6 +180,7 @@ MAX_TEST_SAMPLES = 200 # Set to len(X_test) to stream the full test set
 num_samples = min(MAX_TEST_SAMPLES, len(X_test))
 X_test_subset = X_test[:num_samples]
 y_actual_subset = y_actual[:num_samples]
+y_pred_python_subset = y_pred[:num_samples]
 
 print(f"Connecting to ESP32 (Model 3) on {SERIAL_PORT} at {BAUD_RATE} baud...")
 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2)
@@ -183,10 +217,12 @@ esp_var = np.var(y_actual_subset)
 esp_relative_mse = esp_mse / esp_var
 esp_r2_test = r2_score(y_actual_subset, y_pred_esp32)
 
-print("ESP32 Mean Squared Error (MSE):", esp_mse)
-print(f"ESP32 R-squared (R2) on test set: {esp_r2_test:.6f}")
-print(f"ESP32 Mean Absolute Error (MAE): {esp_mae:.6f}")
-print(f"ESP32 Relative MSE: {esp_relative_mse:.6f}")
+print("\n================ ESP32 HARDWARE TEST RESULTS ================")
+print(f"ESP32 Mean Squared Error (MSE):      {esp_mse:.6f} (Python MSE: {mse:.6f})")
+print(f"ESP32 R-squared (R2) on test set:    {esp_r2_test:.6f} (Python R2: {r2_test:.6f})")
+print(f"ESP32 Mean Absolute Error (MAE):     {esp_mae:.6f} (Python MAE: {mae:.6f})")
+print(f"ESP32 Relative MSE:                  {esp_relative_mse:.6f} (Python Rel MSE: {relative_mse:.6f})")
+print("=============================================================\n")
 
 # --- Graph 1: Training vs Validation Loss (MSE) with ESP32 Benchmark ---
 plt.figure(figsize=(8, 4))
@@ -196,11 +232,16 @@ plt.axhline(y=np.mean((y_test_scaled[:num_samples] - scaler_y.transform(y_pred_e
             color='cyan', linestyle='--', label='ESP32 Hardware Test Loss (Scaled)')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
-plt.title('Model 3: Training and validation loss (with ESP32 Hardware Test Benchmark)')
+title_esp1 = 'Model 3 - Training and validation loss (with ESP32 Hardware Test Benchmark)'
+plt.title(title_esp1)
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+# save_current_plot("esp32", title_esp1)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+#     plt.show()
+# plt.close()
 
 # --- Graph 2: MAE with ESP32 Benchmark ---
 plt.figure(figsize=(8, 4))
@@ -210,8 +251,13 @@ plt.axhline(y=np.mean(np.abs(y_test_scaled[:num_samples] - scaler_y.transform(y_
             color='orange', linestyle='--', label='ESP32 Hardware Test MAE (Scaled)')
 plt.xlabel('Epochs')
 plt.ylabel('Mean Absolute Error')
-plt.title('Model 3: Training and validation Mean absolute error (with ESP32 Benchmark)')
+title_esp2 = 'Model 3 - Training and validation Mean absolute error (with ESP32 Benchmark)'
+plt.title(title_esp2)
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+# save_current_plot("esp32", title_esp2)
+# if os.environ.get("SHOW_PLOTS", "0") == "1":
+#     plt.show()
+# plt.close()
